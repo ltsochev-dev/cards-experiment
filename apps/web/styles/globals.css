@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.game-body::after {
+    content: "";
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    content: "";
+    display: block;
+    z-index: -20;
+    position: fixed;
+    background: linear-gradient(20deg, rgba(38,156,237,1) 1%, rgba(48,104,198,1) 18%, rgba(49,58,156,1) 47%, rgba(57,51,142,1) 72%, rgba(88,52,163,1) 91%, rgba(139,31,198,1) 100%);
+}

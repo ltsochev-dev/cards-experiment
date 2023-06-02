@@ -1,0 +1,11 @@
+{
+    "name": "@cards/types",
+    "version": "0.0.0",
+    "private": true,
+    "main": "src/index.ts",
+    "license": "MIT",
+    "dependencies": {
+        "socket.io": "^4.6.1",
+        "socket.io-client": "^4.6.1"
+    }
+}

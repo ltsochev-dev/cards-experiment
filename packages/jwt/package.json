@@ -1,0 +1,13 @@
+{
+    "name": "@cards/jwt",
+    "version": "0.0.0",
+    "main": "src/index.ts",
+    "license": "MIT",
+    "dependencies": {
+        "jsonwebtoken": "^9.0.0",
+        "uuid": "^9.0.0"
+    },
+    "devDependencies": {
+        "@types/uuid": "^9.0.1"
+    }
+}
