@@ -1,67 +1,62 @@
-import type { Card } from "@cards/types/default";
-import CardComponent from "../Card";
-import { useEffect } from "react";
 import useMeasure from "react-use-measure";
+import { motion } from "framer-motion";
+import CardComponent from "../Card";
+import type { Card } from "@cards/types/default";
 
 interface Props {
   cards: Card[];
+  disabled?: boolean;
+  onCardSelect?: (card: Card) => void;
 }
 
-const generateDegree = (slot: number, total: number) => {
-  if (slot < 1 || slot > 10) {
-    throw new Error("Number must be between 1 and 10");
-  }
+const cardWidth = 244;
 
-  const degreeRange = 75;
-  const step = degreeRange / total;
-  const degree = (slot - 1) * step - degreeRange / 2;
+const generateDegree = (slot: number, total: number, baseRotaDegree = 15) => {
+  const middleCardIndex = Math.floor(total / 2);
+  const maxOffset = middleCardIndex * baseRotaDegree;
 
-  return degree;
+  const offset = (slot - middleCardIndex) * baseRotaDegree;
+
+  return Math.min(offset, maxOffset);
 };
 
-const CardsBar = ({ cards }: Props) => {
-  const [ref, bounds] = useMeasure();
-  useEffect(() => {
-    const resizeCards = () => {
-      console.log("resizing cards");
-    };
+const CardsBar = ({ cards, disabled = false, onCardSelect }: Props) => {
+  const [ref, { width: parentContainer }] = useMeasure();
 
-    window.addEventListener("resize", resizeCards);
+  const totalCards = cards.length;
+  const totalCardsWidth = totalCards * cardWidth;
+  const spacing = (parentContainer - totalCardsWidth) / (totalCards + 1);
 
-    resizeCards();
-
-    return () => {
-      window.removeEventListener("resize", resizeCards);
-    };
-  }, []);
-
-  const cardWidth = 224;
-  const parentContainer = 984;
-  const totalWidth = cardWidth * cards.length;
-  const totalOffset = totalWidth - parentContainer;
-
-  console.log({ bounds });
-
-  // @todo calculate offset
+  const handleCardSelect = (card: Card) => {
+    if (onCardSelect && disabled !== true) {
+      onCardSelect(card);
+    }
+  };
 
   return (
     <div className="gamebar flex flex-row space-x-1" ref={ref}>
       {cards.map((card, i) => (
-        <div
-          className={`absolute z-0 origin-[bottom_center] hover:z-10 left-[${Math.max(
-            0,
-            totalOffset / (i + 1)
-          )}px]`}
+        <motion.div
+          className="absolute bottom-0"
           style={{
-            transform: `rotate(${generateDegree(i + 1, cards.length)}deg`,
+            zIndex: cards.length - i,
           }}
-          key={card.id}
+          animate={{
+            x: (i + 1) * spacing + i * cardWidth,
+            rotate: generateDegree(i, cards.length, 5),
+          }}
+          whileHover={{
+            scale: 1.25,
+            zIndex: 50,
+          }}
+          key={i}
         >
           <CardComponent
             card={card}
-            degree={generateDegree(i + 1, cards.length)}
+            disabled={disabled}
+            onCardSelect={handleCardSelect}
           />
-        </div>
+        </motion.div>
       ))}
     </div>
   );

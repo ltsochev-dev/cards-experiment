@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import SuperJSON from "superjson";
-import { GamePhase, SharedGameState } from "@cards/types/default";
+import { Card, GamePhase, SharedGameState } from "@cards/types/default";
 import { UserSocket } from "@/hooks/useSocket";
 import { playerCards } from "@/data/cards";
 import CardsBar from "./Cardsbar";
@@ -25,6 +25,9 @@ const getGamePhase = (phase: GamePhase) => {
 };
 
 const GameArea = ({ worldState, onStateUpdate, socket }: Props) => {
+  const [cards, setCards] = useState<Card[]>(playerCards);
+  const [usedCards, setUsedCards] = useState<Card[]>([]);
+
   useEffect(() => {
     socket.on("srvUpdate", handleStateUpdate);
 
@@ -42,15 +45,27 @@ const GameArea = ({ worldState, onStateUpdate, socket }: Props) => {
     }
   };
 
+  const handleCardSelect = (card: Card) => {
+    setUsedCards((prevState) => [...prevState, card]);
+    setCards((prevState) => prevState.filter((item) => item.id !== card.id));
+  };
+
   return (
     <div className="game-window relative h-[768px] border">
       <h1>Current game phase: {getGamePhase(worldState.phase)}</h1>
-      <h1>hellooo</h1>
+      <h1>Изиграни карти до момента</h1>
+      <div className="played-cards">
+        <ul>
+          {usedCards.map((card) => (
+            <li key={card.id}>{card.value}</li>
+          ))}
+        </ul>
+      </div>
 
       <div className="absolute right-2.5 top-2.5">Question Card goes here</div>
 
-      <div className="absolute bottom-72">
-        <CardsBar cards={playerCards} />
+      <div className="absolute inset-x-0 bottom-4">
+        <CardsBar cards={cards} onCardSelect={handleCardSelect} />
       </div>
     </div>
   );

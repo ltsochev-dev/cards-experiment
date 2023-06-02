@@ -3,7 +3,7 @@ import { Card } from "@cards/types/default";
 
 interface Props {
   card: Card;
-  degree: number;
+  disabled?: boolean;
   onCardSelect?: (card: Card) => void;
 }
 
@@ -11,7 +11,7 @@ type CardRef = HTMLDivElement;
 type CardProps = HTMLProps<HTMLDivElement> & Props;
 
 const CardComponent = (
-  { card, onCardSelect, degree, ...props }: CardProps,
+  { card, onCardSelect, disabled = false, ...props }: CardProps,
   ref: Ref<CardRef>
 ) => {
   const handleClick = () => {
@@ -19,17 +19,18 @@ const CardComponent = (
       onCardSelect(card);
     }
   };
+
   return (
     <div
-      className="flex h-72 w-56 flex-col justify-between space-x-1 rounded-lg bg-white p-4 shadow-md transition-transform hover:-translate-y-1/4"
+      className={`flex h-72 w-56 flex-col justify-between space-x-1 rounded-lg ${
+        disabled !== true ? "bg-white" : "bg-gray-500"
+      } p-4 shadow-md`}
       onClick={handleClick}
       {...props}
       ref={ref}
     >
       <div className="mb-2 text-lg font-bold text-gray-800">{card.value}</div>
-      <div className="text-sm text-gray-600">
-        Cards Against Humanity {degree}
-      </div>
+      <div className="text-sm text-gray-600">Cards Against Humanity</div>
     </div>
   );
 };
