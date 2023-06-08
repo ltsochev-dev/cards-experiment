@@ -1,6 +1,6 @@
 module.exports = {
   reactStrictMode: true,
-  transpilePackages: ["ui", "@cards/types", "@cards/jwt"],
+  transpilePackages: ["ui", "@cards/types", "@cards/jwt", "@cards/data"],
   images: {
     domains: ['api.multiavatar.com']
   },

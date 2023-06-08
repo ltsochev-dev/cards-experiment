@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import SuperJSON from "superjson";
 import { Card, GamePhase, SharedGameState } from "@cards/types/default";
 import { UserSocket } from "@/hooks/useSocket";
-import { playerCards } from "@/data/cards";
 import CardsBar from "./Cardsbar";
+import { PlayerCards } from "@cards/data";
 
 interface Props {
   worldState: SharedGameState;
@@ -25,7 +25,7 @@ const getGamePhase = (phase: GamePhase) => {
 };
 
 const GameArea = ({ worldState, onStateUpdate, socket }: Props) => {
-  const [cards, setCards] = useState<Card[]>(playerCards);
+  const [cards, setCards] = useState<Card[]>(PlayerCards);
   const [usedCards, setUsedCards] = useState<Card[]>([]);
 
   useEffect(() => {

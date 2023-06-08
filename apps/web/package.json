@@ -12,6 +12,7 @@
     "@cards/jwt": "*",
     "@cards/types": "*",
     "@cards/utils": "*",
+    "@cards/data": "*",
     "framer-motion": "^10.12.16",
     "next": "^13.4.1",
     "react": "^18.2.0",
