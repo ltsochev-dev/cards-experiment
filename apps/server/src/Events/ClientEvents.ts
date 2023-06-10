@@ -1,5 +1,5 @@
 export interface ClientEvents {
-  join: ({ jwt }: { jwt: string }) => void
+  join: (room: string) => void
   quit: ({ room }: { room: string }) => void
   create: ({ name }: { name: string }) => void
   disconnect: () => void

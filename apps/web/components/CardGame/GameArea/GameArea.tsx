@@ -2,10 +2,17 @@
 
 import { useEffect, useState } from "react";
 import SuperJSON from "superjson";
-import { Card, GamePhase, SharedGameState } from "@cards/types/default";
+import {
+  Card,
+  GamePhase,
+  QuestionCard,
+  SharedGameState,
+} from "@cards/types/default";
 import { UserSocket } from "@/hooks/useSocket";
 import CardsBar from "./Cardsbar";
-import { PlayerCards } from "@cards/data";
+import { QuestionCards, PlayerCards } from "@cards/data";
+import { randomNumber } from "@cards/utils";
+import useToggle from "@/hooks/useToggle";
 
 interface Props {
   worldState: SharedGameState;
@@ -25,8 +32,18 @@ const getGamePhase = (phase: GamePhase) => {
 };
 
 const GameArea = ({ worldState, onStateUpdate, socket }: Props) => {
-  const [cards, setCards] = useState<Card[]>(PlayerCards);
+  const [deckOpen, toggleDeck] = useToggle(false);
+  const [cards, setCards] = useState<Card[]>(() => {
+    const startIndex = randomNumber(0, PlayerCards.length - 10);
+
+    return [...PlayerCards].slice(startIndex, startIndex + 10);
+  });
+
   const [usedCards, setUsedCards] = useState<Card[]>([]);
+
+  const [questionCard, _] = useState<QuestionCard>(
+    () => QuestionCards[randomNumber(0, QuestionCards.length - 1)]
+  );
 
   useEffect(() => {
     socket.on("srvUpdate", handleStateUpdate);
@@ -62,11 +79,21 @@ const GameArea = ({ worldState, onStateUpdate, socket }: Props) => {
         </ul>
       </div>
 
-      <div className="absolute right-2.5 top-2.5">Question Card goes here</div>
+      <div className="absolute right-2.5 top-2.5">
+        Question Card: {questionCard.value}
+      </div>
 
       <div className="absolute inset-x-0 bottom-4">
-        <CardsBar cards={cards} onCardSelect={handleCardSelect} />
+        <CardsBar
+          cards={cards}
+          deckOpen={deckOpen}
+          onCardSelect={handleCardSelect}
+          onDeckOpenClick={toggleDeck}
+        />
       </div>
+      <button type="button" onClick={toggleDeck}>
+        Toggle deck
+      </button>
     </div>
   );
 };

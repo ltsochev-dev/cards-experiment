@@ -4,8 +4,7 @@ import {
   GamePhase,
   GameState,
   UserServerSocket,
-  PlayerState,
-  Card
+  PlayerState
 } from '@cards/types/default'
 
 export const getDefaultWorldState = (

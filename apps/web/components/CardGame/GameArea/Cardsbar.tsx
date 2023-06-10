@@ -1,12 +1,15 @@
 import useMeasure from "react-use-measure";
 import { motion } from "framer-motion";
-import CardComponent from "../Card";
 import type { Card } from "@cards/types/default";
+import CardComponent from "../Card";
+import BlankCard from "../BlankCard";
 
 interface Props {
   cards: Card[];
+  deckOpen?: boolean;
   disabled?: boolean;
   onCardSelect?: (card: Card) => void;
+  onDeckOpenClick?: () => void;
 }
 
 const cardWidth = 244;
@@ -20,7 +23,13 @@ const generateDegree = (slot: number, total: number, baseRotaDegree = 15) => {
   return Math.min(offset, maxOffset);
 };
 
-const CardsBar = ({ cards, disabled = false, onCardSelect }: Props) => {
+const CardsBar = ({
+  cards,
+  deckOpen = false,
+  disabled = false,
+  onCardSelect,
+  onDeckOpenClick,
+}: Props) => {
   const [ref, { width: parentContainer }] = useMeasure();
 
   const totalCards = cards.length;
@@ -42,13 +51,20 @@ const CardsBar = ({ cards, disabled = false, onCardSelect }: Props) => {
             zIndex: cards.length - i,
           }}
           animate={{
-            x: (i + 1) * spacing + i * cardWidth,
-            rotate: generateDegree(i, cards.length, 5),
+            x: deckOpen ? (i + 1) * spacing + i * cardWidth : "16px",
+            rotate: deckOpen ? generateDegree(i, cards.length, 5) : i * 0.5,
+            transition: {
+              ease: "anticipate",
+            },
           }}
-          whileHover={{
-            scale: 1.25,
-            zIndex: 50,
-          }}
+          {...(deckOpen
+            ? {
+                whileHover: {
+                  scale: 1.25,
+                  zIndex: 50,
+                },
+              }
+            : {})}
           key={i}
         >
           <CardComponent
@@ -58,6 +74,15 @@ const CardsBar = ({ cards, disabled = false, onCardSelect }: Props) => {
           />
         </motion.div>
       ))}
+      {!deckOpen && (
+        <motion.div
+          className="absolute bottom-0"
+          style={{ zIndex: 100 }}
+          animate={{ x: "16px" }}
+        >
+          <BlankCard onClick={onDeckOpenClick} />
+        </motion.div>
+      )}
     </div>
   );
 };

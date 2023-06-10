@@ -96,3 +96,5 @@ export type SharedGameState = Omit<GameState, 'players'> & {
     }
   >
 }
+
+export type SharedPlayerState = Omit<PlayerState, 'socket' | 'sortOrder'>

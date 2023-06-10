@@ -2,6 +2,8 @@ import express from 'express'
 import { createServer } from 'http'
 import { Server } from 'socket.io'
 import { DefaultEventsMap } from 'socket.io/dist/typed-events'
+import { clearTimeout } from 'timers'
+import { randomUUID } from 'crypto'
 import { getPayload } from '@cards/jwt'
 import {
   JWTUser,
@@ -10,16 +12,16 @@ import {
   GamePhase
 } from '@cards/types/default'
 import { getTimestamp } from '@cards/utils'
-import { clearTimeout } from 'timers'
 import GameStateMap, {
   getDefaultWorldState,
   createPlayerState
 } from './GameState'
 import UserList from './UserList'
+import RoomCardDeck, { createCardManager } from './CardManager'
 import { ServerEvents, ClientEvents } from './Events'
 import SocketData from './SocketData'
 import GameStateDTO from './DTO/GameStateDTO'
-import { randomUUID } from 'crypto'
+import PlayerStateDTO from './DTO/PlayerStateDTO'
 
 let tickTimerId: NodeJS.Timer
 let lastFrameTime = 0
@@ -100,9 +102,13 @@ io.on('connection', socket => {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       UserList.get(socket.data.user!.id).rooms.add(name)
 
+      RoomCardDeck.set(name.trim(), createCardManager())
+
       socket.emit('created', {
         name,
-        state: GameStateMap.get(name.trim()) as GameState
+        state: new GameStateDTO(
+          GameStateMap.get(name.trim()) as GameState
+        ).transform()
       })
     }
   })
@@ -166,6 +172,30 @@ io.on('connection', socket => {
     rooms.sort()
 
     socket.emit('rooms', { rooms })
+  })
+
+  socket.on('join', async room => {
+    const roomState = GameStateMap.get(room)
+    if (!roomState) return
+
+    if (roomState.players.has(socket.data.user!.id)) {
+      const playerState = roomState.players.get(socket.data.user!.id)!
+      const player = new PlayerStateDTO(playerState).toDtoObject()
+
+      io.to(room).emit('joined', { room, player })
+      return
+    }
+
+    // Deal cards to the current player
+    const playerState = createPlayerState(socket, roomState.players.size)
+
+    playerState.cards =
+      (await RoomCardDeck.get(room)?.drawPlayerCards(10)) ?? []
+
+    // roomState.players.set(socket.data.user?.id, playerState)
+
+    // @todo Add the player state object
+    // io.to(room).emit('joined', { room })
   })
 
   socket.on('pong', ({ time }) => {

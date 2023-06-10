@@ -32,13 +32,14 @@ const CardGame = ({ room }: { room?: string }) => {
   useEffect(() => {
     if (!socket) return;
 
+    // @todo Implement emit('join', room) and on('joined', () => void)
+
     socket.on("roomNotFound", ({ room }) => {
       console.error(`Room "${room}" not found at the server.`);
       router.push("/game");
     });
 
     socket.on("roomInfo", ({ json }) => {
-      // @todo Try to pass SharedWorldState to the client app somehow
       const state = SuperJSON.parse<SharedGameState>(json);
 
       setRoomState(state);
@@ -50,6 +51,7 @@ const CardGame = ({ room }: { room?: string }) => {
 
     socket.on("rooms", ({ rooms: srvRooms }) => setRooms(srvRooms));
 
+    // On initial connection server sends WHO.
     socket.on("who", (user) => {
       setUsername(user.name);
       setLoading(false);
