@@ -91,23 +91,28 @@ io.on('connection', socket => {
     }
   })
 
-  socket.on('create', ({ name }: { name: string }) => {
+  socket.on('create', async ({ name }: { name: string }) => {
     console.log('======= CREATE CALLED =============')
     if (name && name.length >= 3 && !GameStateMap.has(name.trim())) {
+      const deckManager = createCardManager()
+      const playerCards = await deckManager.drawPlayerCards(10)
+      const playerState = createPlayerState(socket, 1, playerCards)
+
+      RoomCardDeck.set(name.trim(), deckManager)
+
       GameStateMap.set(
         name.trim(),
-        getDefaultWorldState(name.trim(), createPlayerState(socket))
+        getDefaultWorldState(name.trim(), playerState)
       )
 
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       UserList.get(socket.data.user!.id).rooms.add(name)
 
-      RoomCardDeck.set(name.trim(), createCardManager())
-
       socket.emit('created', {
         name,
         state: new GameStateDTO(
-          GameStateMap.get(name.trim()) as GameState
+          GameStateMap.get(name.trim()) as GameState,
+          playerState.id
         ).transform()
       })
     }
@@ -180,22 +185,26 @@ io.on('connection', socket => {
 
     if (roomState.players.has(socket.data.user!.id)) {
       const playerState = roomState.players.get(socket.data.user!.id)!
-      const player = new PlayerStateDTO(playerState).toDtoObject()
+      const player = new PlayerStateDTO(playerState).toString()
 
       io.to(room).emit('joined', { room, player })
       return
     }
 
     // Deal cards to the current player
+    const cards = (await RoomCardDeck.get(room)?.drawPlayerCards(10)) ?? []
     const playerState = createPlayerState(socket, roomState.players.size)
 
-    playerState.cards =
-      (await RoomCardDeck.get(room)?.drawPlayerCards(10)) ?? []
+    playerState.cards = cards
 
-    // roomState.players.set(socket.data.user?.id, playerState)
+    console.log('Assinging cards to player', { cards })
 
-    // @todo Add the player state object
-    // io.to(room).emit('joined', { room })
+    roomState.players.set(socket.data.user!.id, playerState)
+
+    io.to(room).emit('joined', {
+      room,
+      player: new PlayerStateDTO(playerState).toString()
+    })
   })
 
   socket.on('pong', ({ time }) => {
@@ -209,6 +218,28 @@ io.on('connection', socket => {
     if (playerId) {
       UserList.remove(playerId, socket)
     }
+  })
+
+  socket.on('playCard', ({ room, card }) => {
+    const playerId = socket.data.user!.id
+    const roomState = GameStateMap.get(room)
+    if (!roomState) return
+    if (!roomState.players.has(playerId)) return
+
+    // @todo Add game phase validation
+
+    const playerState = roomState.players.get(playerId)!
+
+    const cardIndex = playerState.cards.findIndex(
+      playerCard => playerCard.id === card
+    )
+
+    if (cardIndex === -1) return
+
+    // The room exists, the player exists and the card exists in the player's deck - deal it
+    playerState.cards.splice(cardIndex, 1)
+
+    socket.emit('removeCard', { card })
   })
 
   socket.emit('begin')
@@ -252,9 +283,7 @@ const tick = () => {
 
     // Game hasn't started yet, no need to apply game logic
     if (state.phase === GamePhase.Waiting) {
-      io.to(room).emit('srvUpdate', {
-        state: new GameStateDTO(state).transform()
-      })
+      broadcastSrvUpdate(room, state)
       continue
     }
 
@@ -262,9 +291,7 @@ const tick = () => {
     // updateWorld(room, state)
 
     // Broadcast the update to all clients
-    io.to(room).emit('srvUpdate', {
-      state: new GameStateDTO(state).transform()
-    })
+    broadcastSrvUpdate(room, state)
   }
 
   for (const [playerId, socketList] of UserList.all()) {
@@ -339,6 +366,20 @@ const closeWorld = (room: string, state: GameState) => {
 
   // Clean up the list
   GameStateMap.delete(room)
+}
+
+const broadcastSrvUpdate = async (room: string, state: GameState) => {
+  const sockets = await io.in(room).fetchSockets()
+
+  if (sockets.length === 0) return
+
+  for (let i = 0; i < sockets.length; i++) {
+    const playerId = sockets[i].data.user.id
+
+    sockets[i].emit('srvUpdate', {
+      state: new GameStateDTO(state, playerId).toString()
+    })
+  }
 }
 
 const gracefulShutdown = () => {

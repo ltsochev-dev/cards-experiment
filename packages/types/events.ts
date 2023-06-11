@@ -13,14 +13,18 @@ export interface EmitEvents extends SocketReservedEvents {
 
   // Broadcast events
   'player-disconnected': ({ id, name }: { id: string; name: string }) => void
+  joined: ({ room, player }: { room: string; player: string }) => void
   rooms: ({ rooms }: { rooms: string[] }) => void
   chat: (message: ChatMessage) => void
   srvUpdate: ({ state }: { state: string }) => void
   quit: ({ room }: { room: string }) => void
+
+  // UI events
+  removeCard: ({ card }: { card: string }) => void
 }
 
 export interface ListenEvents extends SocketReservedEvents {
-  join: ({ jwt }: { jwt: string }) => void
+  join: ({ room }: { room: string }) => void
   quit: ({ room }: { room: string }) => void
   create: ({ name }: { name: string }) => void
   disconnect: () => void
@@ -28,6 +32,9 @@ export interface ListenEvents extends SocketReservedEvents {
   chat: ({ room, message }: { room: string; message: string }) => void
   getRoom: ({ room }: { room: string }) => void
   getRooms: () => void
+
+  // Gameplay events
+  playCard: ({ room, card }: { room: string; card: string }) => void
 }
 
 export interface SocketReservedEvents {

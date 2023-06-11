@@ -1,8 +1,4 @@
-import type {
-  JWTUser,
-  ChatMessage,
-  SharedPlayerState
-} from '@cards/types/default'
+import type { JWTUser, ChatMessage } from '@cards/types/default'
 
 export interface ServerEvents {
   // Socket events
@@ -16,15 +12,12 @@ export interface ServerEvents {
 
   // Broadcast events
   'player-disconnected': ({ id, name }: { id: string; name: string }) => void
-  joined: ({
-    room,
-    player
-  }: {
-    room: string
-    player: SharedPlayerState
-  }) => void
+  joined: ({ room, player }: { room: string; player: string }) => void
   rooms: ({ rooms }: { rooms: string[] }) => void
   chat: (message: ChatMessage) => void
   srvUpdate: ({ state }: { state: string }) => void
   quit: ({ room }: { room: string }) => void
+
+  // UI events
+  removeCard: ({ card }: { card: string }) => void
 }

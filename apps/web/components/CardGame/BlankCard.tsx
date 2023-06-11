@@ -18,8 +18,10 @@ const BlankCard = (
     {...props}
     ref={ref}
   >
-    <div>{children}</div>
-    <div className="text-sm text-gray-600">Cards Against Humanity</div>
+    <div className="select-none">{children}</div>
+    <div className="select-none text-sm text-gray-600">
+      Cards Against Humanity
+    </div>
   </div>
 );
 

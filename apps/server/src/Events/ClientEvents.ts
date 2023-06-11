@@ -7,4 +7,7 @@ export interface ClientEvents {
   chat: ({ room, message }: { room: string; message: string }) => void
   getRoom: ({ room }: { room: string }) => void
   getRooms: () => void
+
+  // Gameplay events
+  playCard: ({ room, card }: { room: string; card: string }) => void
 }

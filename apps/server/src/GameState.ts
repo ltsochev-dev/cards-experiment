@@ -4,7 +4,8 @@ import {
   GamePhase,
   GameState,
   UserServerSocket,
-  PlayerState
+  PlayerState,
+  Card
 } from '@cards/types/default'
 
 export const getDefaultWorldState = (
@@ -27,13 +28,14 @@ export const getDefaultWorldState = (
 
 export const createPlayerState = (
   socket: UserServerSocket,
-  sortOrder?: number
+  sortOrder?: number,
+  cards: Card[] = []
 ): PlayerState => ({
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   id: socket.data!.user!.id,
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   name: socket.data!.user!.name,
-  cards: [],
+  cards,
   sortOrder: sortOrder ?? 0,
   socket: socket
 })

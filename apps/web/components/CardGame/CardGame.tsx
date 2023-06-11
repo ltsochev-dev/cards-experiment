@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import SuperJSON from "superjson";
 import LoadingSpinner from "ui/LoadingSpinner";
 import { slug } from "@cards/utils";
-import { Nullable, SharedGameState } from "@cards/types/default";
+import { JWTUser, Nullable, SharedGameState } from "@cards/types/default";
 import Section from "@/components/Section";
 import Chatbox, { ChatMessage } from "@/components/Chatbox";
 import GameArea from "@/components/CardGame/GameArea";
@@ -14,7 +14,7 @@ import useSocket from "@/hooks/useSocket";
 const CardGame = ({ room }: { room?: string }) => {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [username, setUsername] = useState("");
+  const [currentUser, setCurrentUser] = useState<Nullable<JWTUser>>(null);
   const [rooms, setRooms] = useState<string[]>([]);
   const [roomState, setRoomState] = useState<Nullable<SharedGameState>>(null);
   const [chatMessagelist, setChatMessageList] = useState<ChatMessage[]>([]);
@@ -31,8 +31,6 @@ const CardGame = ({ room }: { room?: string }) => {
 
   useEffect(() => {
     if (!socket) return;
-
-    // @todo Implement emit('join', room) and on('joined', () => void)
 
     socket.on("roomNotFound", ({ room }) => {
       console.error(`Room "${room}" not found at the server.`);
@@ -53,7 +51,7 @@ const CardGame = ({ room }: { room?: string }) => {
 
     // On initial connection server sends WHO.
     socket.on("who", (user) => {
-      setUsername(user.name);
+      setCurrentUser(user);
       setLoading(false);
 
       if (room) {
@@ -75,6 +73,10 @@ const CardGame = ({ room }: { room?: string }) => {
 
     if (!socket.connected) {
       socket.connect();
+
+      if (room) {
+        socket.emit("join", { room });
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [socket]);
@@ -121,8 +123,9 @@ const CardGame = ({ room }: { room?: string }) => {
             </div>
             <div className="my-4 grid w-full grid-cols-5 gap-2">
               <div className="col-span-4">
-                {roomState && (
+                {roomState && currentUser && (
                   <GameArea
+                    currentUser={currentUser}
                     worldState={roomState}
                     onStateUpdate={onSrvUpdate}
                     socket={socket}
@@ -149,7 +152,7 @@ const CardGame = ({ room }: { room?: string }) => {
           </ul>
         </div>
       </div>
-      <h1 className="text-white">Let&apos;s play {username}</h1>
+      <h1 className="text-white">Let&apos;s play {currentUser?.name}</h1>
     </Section>
   );
 };

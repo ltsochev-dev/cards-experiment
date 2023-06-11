@@ -5,16 +5,18 @@ import SuperJSON from "superjson";
 import {
   Card,
   GamePhase,
+  JWTUser,
   QuestionCard,
   SharedGameState,
 } from "@cards/types/default";
 import { UserSocket } from "@/hooks/useSocket";
 import CardsBar from "./Cardsbar";
-import { QuestionCards, PlayerCards } from "@cards/data";
+import { QuestionCards } from "@cards/data";
 import { randomNumber } from "@cards/utils";
 import useToggle from "@/hooks/useToggle";
 
 interface Props {
+  currentUser: JWTUser;
   worldState: SharedGameState;
   socket: UserSocket;
   onStateUpdate?: (state: SharedGameState) => void;
@@ -31,25 +33,27 @@ const getGamePhase = (phase: GamePhase) => {
   }
 };
 
-const GameArea = ({ worldState, onStateUpdate, socket }: Props) => {
+const GameArea = ({
+  currentUser,
+  worldState,
+  onStateUpdate,
+  socket,
+}: Props) => {
   const [deckOpen, toggleDeck] = useToggle(false);
-  const [cards, setCards] = useState<Card[]>(() => {
-    const startIndex = randomNumber(0, PlayerCards.length - 10);
-
-    return [...PlayerCards].slice(startIndex, startIndex + 10);
-  });
-
-  const [usedCards, setUsedCards] = useState<Card[]>([]);
-
   const [questionCard, _] = useState<QuestionCard>(
     () => QuestionCards[randomNumber(0, QuestionCards.length - 1)]
   );
 
+  const currentPlayer = worldState.players.get(currentUser.sub);
+  const cards = currentPlayer?.cards ?? [];
+
   useEffect(() => {
     socket.on("srvUpdate", handleStateUpdate);
+    socket.on("removeCard", handleRemoveCard);
 
     return () => {
       socket.off("srvUpdate", handleStateUpdate);
+      socket.off("removeCard", handleRemoveCard);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [socket]);
@@ -62,22 +66,21 @@ const GameArea = ({ worldState, onStateUpdate, socket }: Props) => {
     }
   };
 
+  const handleRemoveCard = ({ card: cardId }: { card: string }) => {
+    const index = cards.findIndex((card) => card.id === cardId);
+
+    if (index > -1) {
+      cards.splice(index, 1);
+    }
+  };
+
   const handleCardSelect = (card: Card) => {
-    setUsedCards((prevState) => [...prevState, card]);
-    setCards((prevState) => prevState.filter((item) => item.id !== card.id));
+    socket.emit("playCard", { room: worldState.name, card: card.id });
   };
 
   return (
     <div className="game-window relative h-[768px] border">
       <h1>Current game phase: {getGamePhase(worldState.phase)}</h1>
-      <h1>Изиграни карти до момента</h1>
-      <div className="played-cards">
-        <ul>
-          {usedCards.map((card) => (
-            <li key={card.id}>{card.value}</li>
-          ))}
-        </ul>
-      </div>
 
       <div className="absolute right-2.5 top-2.5">
         Question Card: {questionCard.value}
