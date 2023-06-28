@@ -1,6 +1,7 @@
+import { useState } from "react";
 import useMeasure from "react-use-measure";
 import { motion } from "framer-motion";
-import type { Card } from "@cards/types/default";
+import { Nullable, type Card } from "@cards/types/default";
 import CardComponent from "../Card";
 import BlankCard from "../BlankCard";
 
@@ -13,6 +14,7 @@ interface Props {
 }
 
 const cardWidth = 244;
+const cardHeight = 288;
 
 const generateDegree = (slot: number, total: number, baseRotaDegree = 15) => {
   const middleCardIndex = Math.floor(total / 2);
@@ -31,15 +33,45 @@ const CardsBar = ({
   onDeckOpenClick,
 }: Props) => {
   const [ref, { width: parentContainer }] = useMeasure();
+  const [selectedCard, setSelectedCard] = useState<Nullable<Card>>(null);
 
   const totalCards = cards.length;
   const totalCardsWidth = totalCards * cardWidth;
   const spacing = (parentContainer - totalCardsWidth) / (totalCards + 1);
 
-  const handleCardSelect = (card: Card) => {
-    if (onCardSelect && disabled !== true) {
-      onCardSelect(card);
+  const handleDeckOpenClick = () => {
+    setSelectedCard(null);
+
+    if (onDeckOpenClick) {
+      onDeckOpenClick();
     }
+  };
+
+  const handleCardSelect = (card: Card) => {
+    if (onCardSelect && disabled !== true && selectedCard?.id !== card.id) {
+      setSelectedCard(card);
+
+      setTimeout(() => {
+        onCardSelect(card);
+      }, 120);
+    }
+  };
+
+  const generateCoords = (
+    card: Card,
+    i: number
+  ): { x: number | string; y?: number; rotate?: number } => {
+    if (selectedCard?.id === card.id && deckOpen) {
+      return {
+        x: cardHeight * 1.5,
+        y: cardWidth * -1.5,
+        rotate: 0,
+      };
+    }
+
+    return {
+      x: deckOpen ? (i + 1) * spacing + i * cardWidth : "16px",
+    };
   };
 
   return (
@@ -51,8 +83,8 @@ const CardsBar = ({
             zIndex: cards.length - i,
           }}
           animate={{
-            x: deckOpen ? (i + 1) * spacing + i * cardWidth : "16px",
             rotate: deckOpen ? generateDegree(i, cards.length, 5) : i * 0.5,
+            ...generateCoords(card, i),
             transition: {
               ease: "anticipate",
             },
@@ -80,7 +112,7 @@ const CardsBar = ({
           style={{ zIndex: 100 }}
           animate={{ x: "16px" }}
         >
-          <BlankCard onClick={onDeckOpenClick} />
+          <BlankCard onClick={handleDeckOpenClick} />
         </motion.div>
       )}
     </div>
