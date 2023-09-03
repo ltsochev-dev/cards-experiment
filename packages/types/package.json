@@ -5,7 +5,9 @@
     "main": "src/index.ts",
     "license": "MIT",
     "dependencies": {
+        "next": "^13.4.19",
         "socket.io": "^4.6.1",
-        "socket.io-client": "^4.6.1"
+        "socket.io-client": "^4.6.1",
+        "web": "^1.0.0"
     }
 }

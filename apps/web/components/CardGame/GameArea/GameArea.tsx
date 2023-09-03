@@ -14,6 +14,7 @@ import CardsBar from "./Cardsbar";
 import { QuestionCards } from "@cards/data";
 import { randomNumber } from "@cards/utils";
 import useToggle from "@/hooks/useToggle";
+import Timer from "@/components/Timer/Timer";
 
 interface Props {
   currentUser: JWTUser;
@@ -80,10 +81,21 @@ const GameArea = ({
 
   return (
     <div className="game-window relative h-[768px] border">
-      <h1>Current game phase: {getGamePhase(worldState.phase)}</h1>
+      <div className="absolute right-0 top-0 pr-4 text-right">
+        <h1>Current game phase: {getGamePhase(worldState.phase)}</h1>
+        <button type="button" onClick={toggleDeck}>
+          Toggle deck
+        </button>
+      </div>
 
-      <div className="absolute right-2.5 top-2.5">
-        Question Card: {questionCard.value}
+      <div className="absolute left-0 right-0 top-[10%] text-center">
+        <span className="text-3xl font-semibold text-white">
+          Въпрос: {questionCard.value}
+        </span>
+      </div>
+
+      <div className="timer-container absolute left-3 top-3">
+        {deckOpen && <Timer seconds={125} />}
       </div>
 
       <div className="absolute inset-x-0 bottom-4">
@@ -94,9 +106,6 @@ const GameArea = ({
           onDeckOpenClick={toggleDeck}
         />
       </div>
-      <button type="button" onClick={toggleDeck}>
-        Toggle deck
-      </button>
     </div>
   );
 };

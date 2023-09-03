@@ -14,3 +14,7 @@
     position: fixed;
     background: linear-gradient(20deg, rgba(38,156,237,1) 1%, rgba(48,104,198,1) 18%, rgba(49,58,156,1) 47%, rgba(57,51,142,1) 72%, rgba(88,52,163,1) 91%, rgba(139,31,198,1) 100%);
 }
+
+.text-stroke {
+    -webkit-text-stroke: 1px black;
+}

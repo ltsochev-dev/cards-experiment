@@ -4,6 +4,7 @@ module.exports = {
   images: {
     domains: ['api.multiavatar.com']
   },
+  // eslint-disable-next-line no-unused-vars
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
     config.externals.push({
       'utf-8-validate': 'commonjs utf-8-validate',

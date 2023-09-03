@@ -6,6 +6,8 @@
     "types": "./src/index.ts",
     "license": "MIT",
     "dependencies": {
-        "@cards/types": "*"
+        "@cards/types": "*",
+        "next": "^13.4.19",
+        "web": "^1.0.0"
     }
 }

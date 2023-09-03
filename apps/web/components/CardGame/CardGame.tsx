@@ -9,7 +9,7 @@ import { JWTUser, Nullable, SharedGameState } from "@cards/types/default";
 import Section from "@/components/Section";
 import Chatbox, { ChatMessage } from "@/components/Chatbox";
 import GameArea from "@/components/CardGame/GameArea";
-import useSocket from "@/hooks/useSocket";
+import { useWebSocket } from "@/context/websocket.context";
 
 const CardGame = ({ room }: { room?: string }) => {
   const router = useRouter();
@@ -18,16 +18,7 @@ const CardGame = ({ room }: { room?: string }) => {
   const [rooms, setRooms] = useState<string[]>([]);
   const [roomState, setRoomState] = useState<Nullable<SharedGameState>>(null);
   const [chatMessagelist, setChatMessageList] = useState<ChatMessage[]>([]);
-  const socket = useSocket({
-    server: "http://localhost:8080",
-    jwt:
-      typeof window !== "undefined"
-        ? localStorage.getItem("cggame-sess")
-        : null,
-    opts: {
-      autoConnect: false,
-    },
-  });
+  const { socket } = useWebSocket();
 
   useEffect(() => {
     if (!socket) return;
