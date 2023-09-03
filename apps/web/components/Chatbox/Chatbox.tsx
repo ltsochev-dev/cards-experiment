@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useRef, useState } from "react";
 import type { ChatMessage } from "@cards/types/default";
-import type { UserSocket } from "@/hooks/useSocket";
+import type { UserSocket } from "@/context/websocket.context";
 import TextInput from "./TextInput";
 
 interface Props {

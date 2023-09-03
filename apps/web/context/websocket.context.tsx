@@ -23,12 +23,15 @@ export type UserSocket = Socket<EmitEvents, ListenEvents> &
     ): void;
   }>;
 
-type WebSocketContextType = Nullable<{
-  server: string;
+type WebSocketContextType = {
+  server: Nullable<string>;
   socket: Nullable<UserSocket>;
-}>;
+};
 
-const WebSocketContext = createContext<WebSocketContextType>(null);
+const WebSocketContext = createContext<WebSocketContextType>({
+  server: null,
+  socket: null,
+});
 
 interface Props {
   server: string;
@@ -69,8 +72,4 @@ export const WebSocketProvider: FC<Props> = ({
   );
 };
 
-export const useWebSocket = () => {
-  const socket = useContext(WebSocketContext);
-
-  return socket;
-};
+export const useWebSocket = () => useContext(WebSocketContext);

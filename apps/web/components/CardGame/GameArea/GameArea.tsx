@@ -9,7 +9,7 @@ import {
   QuestionCard,
   SharedGameState,
 } from "@cards/types/default";
-import { UserSocket } from "@/hooks/useSocket";
+import { UserSocket } from "@/context/websocket.context";
 import CardsBar from "./Cardsbar";
 import { QuestionCards } from "@cards/data";
 import { randomNumber } from "@cards/utils";
