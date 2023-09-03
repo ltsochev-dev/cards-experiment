@@ -2,16 +2,16 @@
 
 import { FormEvent, useEffect, useRef, useState } from "react";
 import type { ChatMessage } from "@cards/types/default";
-import type { UserSocket } from "@/context/websocket.context";
+import { useWebSocket } from "@/context/websocket.context";
 import TextInput from "./TextInput";
 
 interface Props {
   room: string;
   messages: ChatMessage[];
-  socket: UserSocket;
 }
 
-const Chatbox = ({ room, messages, socket }: Props) => {
+const Chatbox = ({ room, messages }: Props) => {
+  const { socket } = useWebSocket();
   const chatMessagesRef = useRef<ChatMessage[]>([]);
   const [_, setRenderFlag] = useState(false);
 

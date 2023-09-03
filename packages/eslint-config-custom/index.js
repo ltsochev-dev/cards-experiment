@@ -1,7 +1,7 @@
 /** @type {import("eslint").Linter.Config} */
 const config = {
   extends: ["prettier", "eslint:recommended", "turbo"],
-  plugins: ['@typescript-eslint'],
+  plugins: ['@typescript-eslint', 'plugin:@next/next/recommended'],
   parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaVersion: "latest",
@@ -20,6 +20,7 @@ const config = {
       ],
       files: ["**/*.ts", "**/*.tsx"],
       parserOptions: {
+        // eslint-disable-next-line no-undef
         tsconfigRootDir: __dirname,
         project: ["../apps/*/tsconfig.json", "../packages/*/tsconfig.json"]
       },

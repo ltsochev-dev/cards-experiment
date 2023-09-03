@@ -72,4 +72,14 @@ export const WebSocketProvider: FC<Props> = ({
   );
 };
 
-export const useWebSocket = () => useContext(WebSocketContext);
+export const useWebSocket = () => {
+  const { socket, server } = useContext(WebSocketContext);
+
+  if (!socket || !server) {
+    throw new Error(
+      "You can only use useWebSocket as part of WebSocketContextProvider"
+    );
+  }
+
+  return { socket, server };
+};

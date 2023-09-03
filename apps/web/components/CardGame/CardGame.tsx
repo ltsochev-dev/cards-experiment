@@ -5,9 +5,14 @@ import { useRouter } from "next/navigation";
 import SuperJSON from "superjson";
 import LoadingSpinner from "ui/LoadingSpinner";
 import { slug } from "@cards/utils";
-import { JWTUser, Nullable, SharedGameState } from "@cards/types/default";
+import {
+  ChatMessage,
+  JWTUser,
+  Nullable,
+  SharedGameState,
+} from "@cards/types/default";
 import Section from "@/components/Section";
-import Chatbox, { ChatMessage } from "@/components/Chatbox";
+import Chatbox from "@/components/Chatbox";
 import GameArea from "@/components/CardGame/GameArea";
 import { useWebSocket } from "@/context/websocket.context";
 
@@ -119,16 +124,11 @@ const CardGame = ({ room }: { room?: string }) => {
                     currentUser={currentUser}
                     worldState={roomState}
                     onStateUpdate={onSrvUpdate}
-                    socket={socket}
                   />
                 )}
               </div>
               <div className="col-span-1">
-                <Chatbox
-                  room={room}
-                  messages={chatMessagelist}
-                  socket={socket}
-                />
+                <Chatbox room={room} messages={chatMessagelist} />
               </div>
             </div>
           </>

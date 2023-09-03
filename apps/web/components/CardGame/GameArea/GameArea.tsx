@@ -9,7 +9,7 @@ import {
   QuestionCard,
   SharedGameState,
 } from "@cards/types/default";
-import { UserSocket } from "@/context/websocket.context";
+import { useWebSocket } from "@/context/websocket.context";
 import CardsBar from "./Cardsbar";
 import { QuestionCards } from "@cards/data";
 import { randomNumber } from "@cards/utils";
@@ -19,7 +19,6 @@ import Timer from "@/components/Timer/Timer";
 interface Props {
   currentUser: JWTUser;
   worldState: SharedGameState;
-  socket: UserSocket;
   onStateUpdate?: (state: SharedGameState) => void;
 }
 
@@ -34,12 +33,8 @@ const getGamePhase = (phase: GamePhase) => {
   }
 };
 
-const GameArea = ({
-  currentUser,
-  worldState,
-  onStateUpdate,
-  socket,
-}: Props) => {
+const GameArea = ({ currentUser, worldState, onStateUpdate }: Props) => {
+  const { socket } = useWebSocket();
   const [deckOpen, toggleDeck] = useToggle(false);
   const [questionCard, _] = useState<QuestionCard>(
     () => QuestionCards[randomNumber(0, QuestionCards.length - 1)]

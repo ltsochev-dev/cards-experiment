@@ -6,7 +6,7 @@ type InputRef = HTMLInputElement;
 type InputBtnProps = Omit<HTMLProps<HTMLInputElement>, "className"> & {
   label?: string;
   buttonLabel?: string;
-  ButtonProps?: Omit<HTMLProps<HTMLButtonElement>, "className">;
+  ButtonProps?: Omit<HTMLProps<HTMLButtonElement>, "className" | "type">;
   LabelProps?: Omit<HTMLProps<HTMLLabelElement>, "className">;
   onBtnSubmit?: (_: string) => void;
 };
